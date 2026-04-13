@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>🧠 Save or Damage?</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: "Comic Sans MS", cursive;
+  background: linear-gradient(135deg, #56ab2f, #a8e063);
+  min-height: 100vh;
+  text-align: center;
+}
+
+/* Back button */
+.back-btn {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: #2d3436;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 25px;
+  text-decoration: none;
+}
+.back-btn:hover { background: #00b894; }
+
+.game-box {
+  background: rgba(255,255,255,0.95);
+  width: 90%;
+  max-width: 700px;
+  margin: 80px auto;
+  padding: 25px;
+  border-radius: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+h1 { margin-bottom: 10px; }
+
+.statement {
+  font-size: 22px;
+  margin: 25px 0;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.btn {
+  padding: 15px 35px;
+  font-size: 20px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.save {
+  background: #00b894;
+  color: white;
+}
+.damage {
+  background: #d63031;
+  color: white;
+}
+
+.btn:hover {
+  transform: scale(1.1);
+}
+
+.info {
+  margin-top: 15px;
+  font-size: 18px;
+}
+
+.dashboard {
+  margin-top: 25px;
+  background: #dfe6e9;
+  padding: 15px;
+  border-radius: 15px;
+}
+.badge { font-size: 32px; }
+</style>
+</head>
+
+<body>
+
+<a href="../menu.html" class="back-btn">⬅ Back</a>
+
+<div class="game-box">
+  <h1>🧠 Save or Damage?</h1>
+  <p>Choose wisely to protect nature 🌍</p>
+
+  <div class="statement" id="statement"></div>
+
+  <div class="buttons">
+    <button class="btn save" onclick="answer(true)">🌱 Save</button>
+    <button class="btn damage" onclick="answer(false)">🔥 Damage</button>
+  </div>
+
+  <div class="info">
+    Score: <span id="score">0</span> |
+    Attempts Left: <span id="attempts">3</span>
+  </div>
+
+  <div class="dashboard">
+    <h3>📊 Player Dashboard</h3>
+    <p>Best Score: <span id="best">0</span></p>
+    <p>Badge: <span class="badge" id="badge">🎖️</span></p>
+  </div>
+</div>
+
+<!-- Sounds -->
+<audio id="correctSound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3"></audio>
+<audio id="wrongSound" src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3"></audio>
+
+<script>
+const questions = [
+  { text: "Planting trees in empty land", save: true },
+  { text: "Throwing plastic into rivers", save: false },
+  { text: "Using cloth bags instead of plastic", save: true },
+  { text: "Cutting forests for no reason", save: false },
+  { text: "Saving water at home", save: true },
+  { text: "Burning waste in open areas", save: false },
+  { text: "Feeding birds clean grains", save: true },
+  { text: "Hunting wild animals", save: false }
+];
+
+let index = 0;
+let score = 0;
+let attempts = 3;
+
+const statementEl = document.getElementById("statement");
+const scoreEl = document.getElementById("score");
+const attemptsEl = document.getElementById("attempts");
+
+function loadQuestion() {
+  if (index < questions.length) {
+    statementEl.innerText = `Q${index + 1}. ${questions[index].text}`;
+  } else {
+    endGame();
+  }
+}
+
+function answer(choice) {
+  if (choice === questions[index].save) {
+    score++;
+    document.getElementById("correctSound").play();
+  } else {
+    attempts--;
+    document.getElementById("wrongSound").play();
+  }
+
+  scoreEl.innerText = score;
+  attemptsEl.innerText = attempts;
+  index++;
+
+  if (attempts === 0 || index === questions.length) {
+    endGame();
+  } else {
+    loadQuestion();
+  }
+}
+
+function endGame() {
+  saveData();
+  updateDashboard();
+  alert(`🌍 Game Over!\nYour Score: ${score}/${questions.length}`);
+}
+
+function saveData() {
+  let data = JSON.parse(localStorage.getItem("gameData")) || {};
+  if (!data.saveDamage) data.saveDamage = { best: 0 };
+  data.saveDamage.best = Math.max(data.saveDamage.best, score);
+  localStorage.setItem("gameData", JSON.stringify(data));
+}
+
+function updateDashboard() {
+  let data = JSON.parse(localStorage.getItem("gameData")) || {};
+  document.getElementById("best").innerText =
+    data.saveDamage ? data.saveDamage.best : 0;
+
+  let badge = "🎖️";
+  if (score >= 3) badge = "🥉";
+  if (score >= 5) badge = "🥈";
+  if (score >= 7) badge = "🥇";
+  document.getElementById("badge").innerText = badge;
+}
+
+loadQuestion();
+updateDashboard();
+</script>
+
+</body>
+</html>

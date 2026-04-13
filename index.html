@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Guardians of the Wild</title>
+
+    <style>
+        /* RESET */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* BACKGROUND VIDEO */
+        #bgVideo {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        /* DARK OVERLAY */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: -1;
+        }
+
+        /* HERO */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            gap: 25px;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        h1 {
+            font-size: 4rem;
+        }
+
+        /* TOGGLE */
+        .toggle-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.1rem;
+        }
+
+        .switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: #555;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.4s;
+        }
+
+        .slider::before {
+            content: "🍃";
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            left: 2px;
+            bottom: 2px;
+            background: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 26px;
+            transition: 0.4s;
+        }
+
+        input:checked + .slider {
+            background: #2d6a4f;
+        }
+
+        input:checked + .slider::before {
+            transform: translateX(30px);
+        }
+
+        /* START BUTTON */
+        .start-btn {
+            padding: 16px 45px;
+            font-size: 18px;
+            border-radius: 40px;
+            background: #52b788;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: none;
+        }
+
+        .start-btn:hover {
+            background: #2d6a4f;
+            transform: scale(1.1);
+        }
+
+        /* NAME MODAL */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-box {
+            background: #1b4332;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            width: 300px;
+        }
+
+        .modal-box h2 {
+            margin-bottom: 15px;
+        }
+
+        .modal-box input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .modal-box button {
+            padding: 10px 25px;
+            border-radius: 20px;
+            border: none;
+            background: #52b788;
+            color: white;
+            cursor: pointer;
+        }
+
+        .modal-box button:hover {
+            background: #40916c;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- VIDEO -->
+    <video autoplay muted loop id="bgVideo">
+        <source src="jungle.mp4" type="video/mp4">
+    </video>
+
+    <!-- HERO -->
+    <div class="hero">
+        <p class="tagline">Inspired by <b>Vantara</b> – Where compassion meets conservation</p>
+        <h1>Guardians of the Wild</h1>
+
+        <div class="toggle-box">
+            🌿 Protect the Jungle
+            <label class="switch">
+                <input type="checkbox" id="jungleToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <button class="start-btn" id="startBtn">Start Game</button>
+    </div>
+
+    <!-- NAME MODAL -->
+    <div class="modal" id="nameModal">
+        <div class="modal-box">
+            <h2>🐾 Enter Your Name</h2>
+            <input type="text" id="playerName" placeholder="Your name here">
+            <button onclick="saveName()">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        const toggle = document.getElementById("jungleToggle");
+        const startBtn = document.getElementById("startBtn");
+        const modal = document.getElementById("nameModal");
+
+        toggle.addEventListener("change", () => {
+            startBtn.style.display = toggle.checked ? "block" : "none";
+        });
+
+        startBtn.addEventListener("click", () => {
+            modal.style.display = "flex";
+        });
+
+        function saveName() {
+            const name = document.getElementById("playerName").value.trim();
+            if (name === "") {
+                alert("Please enter your name 🌿");
+                return;
+            }
+            localStorage.setItem("playerName", name);
+            window.location.href = "menu.html";
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Wild Game Zone</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* 📊 Dashboard Icon */
+    .dashboard-icon {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 28px;
+      background: #ffffff;
+      padding: 10px 14px;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      transition: 0.3s;
+      z-index: 10;
+    }
+
+    .dashboard-icon:hover {
+      transform: scale(1.2);
+      background: #d4f5d0;
+    }
+
+    /* 📦 Dashboard Popup */
+    .dashboard-box {
+      position: absolute;
+      top: 70px;
+      right: 20px;
+      width: 230px;
+      background: rgba(0,0,0,0.9);
+      color: white;
+      padding: 15px;
+      border-radius: 15px;
+      display: none;
+      box-shadow: 0 0 15px #000;
+      animation: fadeIn 0.3s ease;
+      z-index: 10;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dashboard-box h3 {
+      margin-bottom: 10px;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .dashboard-box p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+
+    .dashboard-box hr {
+      margin: 8px 0;
+      border: 0.5px solid #aaa;
+    }
+
+    /* Make CORE ZONE relative for icon */
+    .zone {
+      position: relative;
+    }
+  </style>
+</head>
+
+<body class="menu">
+
+  <!-- Moving Animals Background -->
+  <div class="animal monkey">🐒</div>
+  <div class="animal bird">🦜</div>
+  <div class="animal elephant">🐘</div>
+  <div class="animal tiger">🐯</div>
+  <div class="animal turtle">🐢</div>
+
+  <!-- WELCOME MESSAGE -->
+  <h2 class="welcome-text" id="welcomeText"></h2>
+
+  <h1 class="menu-title">🌿 Choose Your Jungle Game 🌿</h1>
+
+  <!-- 🌍 CORE AWARENESS ZONE -->
+  <div class="zone">
+    <h2>🌍 CORE AWARENESS ZONE</h2>
+
+    <!-- 📊 Dashboard Icon -->
+    <div class="dashboard-icon" onclick="toggleDashboard()">📊</div>
+
+    <!-- 📦 Dashboard Popup -->
+    <div class="dashboard-box" id="dashboardBox">
+      <h3>🌿 Jungle Scores</h3>
+
+      <p>🐒 Monkey Quiz: <span id="monkeyScore">0</span></p>
+      <p>🦉 Owl Facts: <span id="owlScore">0</span></p>
+      <p>🧠 Save/Damage: <span id="saveScore">0</span></p>
+      <p>🐾 Habitat Match: <span id="habitatScore">0</span></p>
+
+      <hr>
+      <p><b>Total: <span id="totalScore">0</span></b></p>
+    </div>
+
+    <div class="games">
+      <a href="games/monkey-quiz.html" class="big-btn">🐒 Monkey Mind Quiz</a>
+      <a href="games/owl-facts.html" class="big-btn">🦉 Owl Fact or Myth</a>
+      <a href="games/habitat-match.html" class="big-btn">🐾 Who Lives Where?</a>
+      <a href="games/save-damage.html" class="big-btn">🧠 Save or Damage?</a>
+    </div>
+  </div>
+
+  <!-- 🧹 ECO ACTION ZONE -->
+  <div class="zone">
+    <h2>🧹 ECO ACTION ZONE</h2>
+    <div class="games">
+      <a href="games/trash-safari.html" class="big-btn">🧹 Trash Smash Safari</a>
+      <a href="games/recycle-rush.html" class="big-btn">♻️ Recycle Rush</a>
+      <a href="games/plant-protect.html" class="big-btn">🌱 Plant & Protect</a>
+      <a href="games/water-saver.html" class="big-btn">🚱 Water Saver Challenge</a>
+    </div>
+  </div>
+
+  <!-- 🌿 STORY ADVENTURE ZONE -->
+  <div class="zone">
+    <h2>🌿 STORY ADVENTURE ZONE</h2>
+    <div class="games">
+      <a href="games/animal-journey.html" class="big-btn">🧭 Journey of an Animal</a>
+      <a href="games/build-sanctuary.html" class="big-btn">🏕️ Build a Safe Sanctuary</a>
+    </div>
+  </div>
+
+  <!-- 🎨 CREATIVE CORNER -->
+  <div class="zone">
+    <h2>🎨 CREATIVE CORNER</h2>
+    <div class="games">
+      <a href="games/animal-memory.html" class="big-btn">🧩 Puzzle of the Planet</a>
+      <a href="games/animal-sound.html" class="big-btn">🎧 Guess the Animal Sound</a>
+      <a href="games/color-wild.html" class="big-btn">🖌️ Color the Wild</a>
+    </div>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    const playerName = localStorage.getItem("playerName");
+    const welcomeText = document.getElementById("welcomeText");
+
+    if (playerName) {
+      welcomeText.innerText = `🌿 Welcome, ${playerName}! Ready to protect the wild?`;
+    } else {
+      welcomeText.innerText = "🌿 Welcome, Jungle Guardian!";
+    }
+
+    function toggleDashboard() {
+      const box = document.getElementById("dashboardBox");
+      box.style.display = box.style.display === "block" ? "none" : "block";
+      loadScores();
+    }
+
+    function loadScores() {
+      let data = JSON.parse(localStorage.getItem("gameData")) || {};
+
+      let monkey = data.monkeyQuiz?.bestScore || 0;
+      let owl = data.owlFacts?.bestScore || 0;
+      let save = data.saveDamage?.best || 0;
+      let habitat = data.habitatMatch?.best || 0;
+
+      document.getElementById("monkeyScore").innerText = monkey;
+      document.getElementById("owlScore").innerText = owl;
+      document.getElementById("saveScore").innerText = save;
+      document.getElementById("habitatScore").innerText = habitat;
+
+      document.getElementById("totalScore").innerText =
+        monkey + owl + save + habitat;
+    }
+  </script>
+
+</body>
+</html>

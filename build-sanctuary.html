@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sanctuary Defender</title>
+
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: linear-gradient(#4caf50, #1b5e20);
+    color: white;
+}
+
+.dashboard {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 15px;
+    flex-wrap: wrap;
+}
+
+.card {
+    background: rgba(0,0,0,0.4);
+    padding: 10px 15px;
+    border-radius: 10px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(5, 80px);
+    gap: 10px;
+    justify-content: center;
+}
+
+.cell {
+    width: 80px;
+    height: 80px;
+    background: #2e7d32;
+    border-radius: 10px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🌿 Sanctuary Defender 🐾</h1>
+
+<div class="dashboard">
+    <div class="card">Score: <span id="score">0</span></div>
+    <div class="card">Saved: <span id="saved">0</span></div>
+    <div class="card">Lost: <span id="lost">0</span></div>
+    <div class="card">Caught: <span id="caught">0</span></div>
+    <div class="card">Lives: <span id="lives">3</span></div>
+</div>
+<div class="game-container">
+    <div class="grid" id="grid"></div>
+
+    <a href="../menu.html" class="back-btn">
+        ⬅ Back to Menu
+    </a>
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+let score = 0;
+let saved = 0;
+let lost = 0;
+let caught = 0;
+let lives = 3;
+
+let cells = [];
+let animals = ["🐅","🐘","🦌","🦚"];
+
+const grid = document.getElementById("grid");
+
+// Create grid
+for (let i = 0; i < 25; i++) {
+    let cell = document.createElement("div");
+    cell.classList.add("cell");
+    cell.dataset.state = "empty";
+
+    cell.onclick = function () {
+
+        if (cell.dataset.state === "poacher") {
+            cell.textContent = "";
+            cell.dataset.state = "empty";
+
+            score -= 1;
+            caught++;
+        }
+
+        else if (cell.dataset.state === "animal") {
+            cell.textContent = "🛡️";
+            cell.dataset.state = "saved";
+
+            score += 1;
+            saved++;
+        }
+
+        updateUI();
+    };
+
+    grid.appendChild(cell);
+    cells.push(cell);
+    
+}
+
+// Spawn animal
+function spawnAnimal() {
+    let empty = cells.filter(c => c.dataset.state === "empty");
+    if (empty.length === 0) return;
+
+    let cell = empty[Math.floor(Math.random() * empty.length)];
+    cell.textContent = animals[Math.floor(Math.random() * animals.length)];
+    cell.dataset.state = "animal";
+
+    setTimeout(() => {
+        if (cell.dataset.state === "animal") {
+            cell.textContent = "";
+            cell.dataset.state = "empty";
+
+            lost++;
+            lives--;
+
+            updateUI();
+
+            if (lives <= 0) gameOver();
+        }
+    }, 3000);
+}
+
+// Spawn poacher
+function spawnPoacher() {
+    let empty = cells.filter(c => c.dataset.state === "empty");
+    if (empty.length === 0) return;
+
+    let cell = empty[Math.floor(Math.random() * empty.length)];
+    cell.textContent = "😈";
+    cell.dataset.state = "poacher";
+
+    setTimeout(() => {
+        if (cell.dataset.state === "poacher") {
+            cell.textContent = "";
+            cell.dataset.state = "empty";
+        }
+    }, 3000);
+}
+
+// Update UI
+function updateUI() {
+    document.getElementById("score").textContent = score;
+    document.getElementById("saved").textContent = saved;
+    document.getElementById("lost").textContent = lost;
+    document.getElementById("caught").textContent = caught;
+    document.getElementById("lives").textContent = lives;
+}
+
+// Game Over
+function gameOver() {
+    alert("💀 Game Over!\nScore: " + score);
+    location.reload();
+}
+
+// Game loop
+setInterval(spawnAnimal, 2000);
+setInterval(spawnPoacher, 4000);
+
+});
+</script>
+
+</body>
+</html>

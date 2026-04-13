@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>🦉 Owl Fact or Myth</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: "Comic Sans MS", cursive;
+    background: radial-gradient(circle at top, #1b263b, #0d1b2a);
+    color: white;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .owl {
+    position: absolute;
+    font-size: 60px;
+    top: 20%;
+    animation: fly 14s linear infinite;
+    opacity: 0.9;
+  }
+
+  .star {
+    position: absolute;
+    color: gold;
+    animation: twinkle 3s infinite alternate;
+  }
+
+  @keyframes fly {
+    from { left: -20%; }
+    to { left: 120%; }
+  }
+
+  @keyframes twinkle {
+    from { opacity: 0.3; }
+    to { opacity: 1; }
+  }
+
+  .game-box {
+    background: rgba(0,0,0,0.6);
+    margin: 80px auto;
+    padding: 30px;
+    width: 85%;
+    max-width: 650px;
+    border-radius: 25px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.6);
+  }
+
+  h1 { margin-bottom: 10px; }
+
+  .question {
+    font-size: 22px;
+    margin: 25px 0;
+  }
+
+  .btn {
+    padding: 15px 40px;
+    margin: 10px;
+    font-size: 18px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    background: #f1c40f;
+    color: black;
+    transition: 0.3s;
+  }
+
+  .btn:hover {
+    transform: scale(1.1);
+    background: #f39c12;
+  }
+
+  .info {
+    margin-top: 15px;
+    font-size: 18px;
+  }
+</style>
+</head>
+
+<body>
+  <a href="../menu.html" class="back-btn">⬅ Back</a>
+
+<div class="owl">🦉</div>
+<div class="star" style="top:10%;left:20%;">✨</div>
+<div class="star" style="top:30%;left:70%;">⭐</div>
+<div class="star" style="top:60%;left:40%;">✨</div>
+
+<audio id="owlSound" src="../sounds/owl.mp3"></audio>
+<audio id="correctSound" src="../sounds/correct.mp3"></audio>
+<audio id="wrongSound" src="../sounds/wrong.mp3"></audio>
+
+<div class="game-box">
+  <h1>🦉 Owl Fact or Myth</h1>
+
+  <div class="question" id="question"></div>
+
+  <button class="btn" onclick="checkAnswer(true)">✅ Fact</button>
+  <button class="btn" onclick="checkAnswer(false)">❌ Myth</button>
+
+  <div class="info" id="attemptInfo"></div>
+  <div class="info" id="scoreInfo"></div>
+</div>
+
+<script>
+const questions = [
+ {q:"Owls can rotate their heads almost 270 degrees.", a:true},
+ {q:"Owls are blind during the day.", a:false},
+ {q:"Owls can fly silently.", a:true},
+ {q:"Owls only eat fruits.", a:false},
+ {q:"Owls help farmers by eating pests.", a:true},
+ {q:"Owls sleep with eyes always closed.", a:false},
+ {q:"Owls have excellent night vision.", a:true},
+ {q:"Owls are active mostly at night.", a:true},
+ {q:"Owls can live in deserts and forests.", a:true},
+ {q:"All owls hoot the same way.", a:false}
+];
+
+let current = 0;
+let score = 0;
+let attemptsLeft = 1;
+
+const qEl = document.getElementById("question");
+const attemptInfo = document.getElementById("attemptInfo");
+const scoreInfo = document.getElementById("scoreInfo");
+
+document.getElementById("owlSound").play();
+
+function loadQuestion() {
+  attemptsLeft = 2;
+  qEl.innerText = `Q${current + 1}. ${questions[current].q}`;
+  attemptInfo.innerText = `Attempts left: ${attemptsLeft}`;
+  scoreInfo.innerText = `Score: ${score}/${questions.length}`;
+}
+
+function checkAnswer(choice) {
+  if (choice === questions[current].a) {
+    document.getElementById("correctSound").play();
+    alert("🎉 Correct!");
+    score++;
+    saveData();
+    nextQuestion();
+  } else {
+    document.getElementById("wrongSound").play();
+    attemptsLeft--;
+    if (attemptsLeft > 0) {
+      alert("❌ Wrong! Try again!");
+      attemptInfo.innerText = `Attempts left: ${attemptsLeft}`;
+    } else {
+      alert("❌ No attempts left!");
+      saveData();
+      nextQuestion();
+    }
+  }
+}
+
+function nextQuestion() {
+  current++;
+  if (current < questions.length) {
+    loadQuestion();
+  } else {
+    alert(`🦉 Quiz Finished!\nYour Score: ${score}/${questions.length}`);
+    saveData(true);
+    window.location.href = "../menu.html";
+  }
+}
+
+function saveData(final = false) {
+  let data = JSON.parse(localStorage.getItem("gameData")) || {};
+
+  if (!data.owlFacts) {
+    data.owlFacts = { plays: 0, bestScore: 0 };
+  }
+
+  if (final) data.owlFacts.plays++;
+  data.owlFacts.bestScore = Math.max(data.owlFacts.bestScore, score);
+
+  localStorage.setItem("gameData", JSON.stringify(data));
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>

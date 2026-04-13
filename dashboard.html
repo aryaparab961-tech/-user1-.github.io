@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Jungle Dashboard</title>
+  <style>
+    body {
+      font-family:sans-serif;
+      text-align:center;
+      background:#e9f5db;
+    }
+
+    h2 { margin-top:20px; }
+
+    .board {
+      width:350px;
+      margin:20px auto;
+      padding:20px;
+      background:white;
+      border-radius:15px;
+      box-shadow:0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .row {
+      display:flex;
+      justify-content:space-between;
+      padding:10px;
+      border-bottom:1px solid #ccc;
+    }
+
+    .total {
+      font-weight:bold;
+      font-size:18px;
+      color:#2d6a4f;
+    }
+
+    button {
+      margin-top:10px;
+      padding:8px 15px;
+      border:none;
+      background:#52b788;
+      color:white;
+      border-radius:20px;
+      cursor:pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>📊 Jungle Game Dashboard</h2>
+
+<div class="board">
+
+  <div class="row"><span>🌿 Forest Guard</span><span id="forest">0</span></div>
+  <div class="row"><span>🐒 Monkey Quiz</span><span id="quiz">0</span></div>
+  <div class="row"><span>🃏 Memory Game</span><span id="memory">0</span></div>
+  <div class="row"><span>🎨 Drawing</span><span id="drawing">0</span></div>
+  <div class="row"><span>🧩 Puzzle</span><span id="puzzle">0</span></div>
+  <div class="row"><span>♻️ Recycle Game</span><span id="recycle">0</span></div>
+
+  <div class="row total">
+    <span>Total Score</span>
+    <span id="total">0</span>
+  </div>
+
+</div>
+
+<button onclick="resetScores()">🧹 Reset All</button>
+
+<br><br>
+<a href="menu.html">⬅ Back to Menu</a>
+
+<script>
+function loadScores(){
+
+  let forest = parseInt(localStorage.getItem("forestGuardScore")) || 0;
+  let quiz = parseInt(localStorage.getItem("quizScore")) || 0;
+  let memory = parseInt(localStorage.getItem("memoryScore")) || 0;
+  let drawing = parseInt(localStorage.getItem("drawingScore")) || 0;
+  let puzzle = parseInt(localStorage.getItem("puzzleScore")) || 0;
+  let recycle = parseInt(localStorage.getItem("recycleScore")) || 0;
+
+  document.getElementById("forest").innerText = forest;
+  document.getElementById("quiz").innerText = quiz;
+  document.getElementById("memory").innerText = memory;
+  document.getElementById("drawing").innerText = drawing;
+  document.getElementById("puzzle").innerText = puzzle;
+  document.getElementById("recycle").innerText = recycle;
+
+  document.getElementById("total").innerText =
+    forest + quiz + memory + drawing + puzzle + recycle;
+}
+
+function resetScores(){
+  localStorage.clear();
+  loadScores();
+}
+
+loadScores();
+</script>
+
+</body>
+</html>

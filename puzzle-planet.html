@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Animal Puzzle</title>
+  <style>
+    body { text-align:center; font-family:sans-serif; background:#edf7f0; }
+
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(3,100px);
+      gap:2px;
+      justify-content:center;
+      margin-top:20px;
+    }
+
+    .tile {
+      width:100px;
+      height:100px;
+      background-size:300px 300px;
+      cursor:grab;
+      border:1px solid #333;
+    }
+
+    #timer {
+      font-size:20px;
+      margin-top:10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>🐾 Animal Puzzle Challenge</h2>
+<p id="animalName"></p>
+<p id="timer">⏳ Time: 0s</p>
+
+<div class="grid" id="grid"></div>
+
+<p id="msg"></p>
+
+<a href="../menu.html">⬅ Back to Menu</a>
+
+<script>
+const animals = [
+  {name:"🐯 Tiger", img:"tiger.jpg"},
+  {name:"🐘 Elephant", img:"elephant.jpg"},
+  {name:"🦜 Parrot", img:"parrot.jpg"},
+  {name:"🐢 Turtle", img:"turtle.jpg"}
+];
+
+// 🎯 pick random animal
+const chosen = animals[Math.floor(Math.random()*animals.length)];
+document.getElementById("animalName").innerText = "Solve: " + chosen.name;
+
+const image = chosen.img;
+
+const size = 3;
+let tiles = [];
+let correct = [];
+let time = 0;
+let timerInterval;
+
+// create correct positions
+for(let i=0;i<size*size;i++){
+  correct.push(i);
+}
+tiles = [...correct].sort(()=>Math.random()-0.5);
+
+const grid = document.getElementById("grid");
+
+// start timer
+timerInterval = setInterval(()=>{
+  time++;
+  document.getElementById("timer").innerText = "⏳ Time: " + time + "s";
+},1000);
+
+function render(){
+  grid.innerHTML="";
+
+  tiles.forEach((val,index)=>{
+    let div = document.createElement("div");
+    div.className="tile";
+
+    let x = (val % size) * 100;
+    let y = Math.floor(val / size) * 100;
+
+    div.style.backgroundImage = `url(${image})`;
+    div.style.backgroundPosition = `-${x}px -${y}px`;
+
+    div.draggable = true;
+    div.dataset.index = index;
+
+    div.ondragstart = e=>{
+      e.dataTransfer.setData("text", index);
+    };
+
+    div.ondrop = e=>{
+      let from = e.dataTransfer.getData("text");
+      let to = index;
+
+      [tiles[from], tiles[to]] = [tiles[to], tiles[from]];
+      render();
+    };
+
+    div.ondragover = e=> e.preventDefault();
+
+    grid.appendChild(div);
+  });
+
+  // ✅ check win
+  if(JSON.stringify(tiles) === JSON.stringify(correct)){
+    clearInterval(timerInterval);
+
+    document.getElementById("msg").innerText =
+      "🎉 You completed " + chosen.name + " in " + time + " seconds!";
+  }
+}
+
+render();
+</script>
+
+</body>
+</html>

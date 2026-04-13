@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Jungle Drawing Board</title>
+  <style>
+    body {
+      text-align:center;
+      font-family:sans-serif;
+      background:#eef7f0;
+    }
+
+    canvas {
+      border:3px solid #333;
+      border-radius:10px;
+      background:white;
+      cursor:crosshair;
+      margin-top:10px;
+    }
+
+    .toolbar {
+      margin-top:10px;
+    }
+
+    .color-btn {
+      width:25px;
+      height:25px;
+      border:none;
+      margin:3px;
+      border-radius:50%;
+      cursor:pointer;
+    }
+
+    button {
+      margin:5px;
+      padding:6px 10px;
+      cursor:pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>🎨 Jungle Drawing Board</h2>
+
+<canvas id="canvas" width="500" height="350"></canvas>
+
+<div class="toolbar">
+
+  <!-- 🎨 COLORS -->
+  <div>
+    <button class="color-btn" style="background:black" onclick="setColor('black')"></button>
+    <button class="color-btn" style="background:red" onclick="setColor('red')"></button>
+    <button class="color-btn" style="background:green" onclick="setColor('green')"></button>
+    <button class="color-btn" style="background:blue" onclick="setColor('blue')"></button>
+    <button class="color-btn" style="background:orange" onclick="setColor('orange')"></button>
+    <button class="color-btn" style="background:purple" onclick="setColor('purple')"></button>
+  </div>
+
+  <br>
+
+  <!-- 🛠️ TOOLS -->
+  <button onclick="setTool('brush')">✏️ Brush</button>
+  <button onclick="setTool('eraser')">🧽 Eraser</button>
+  <button onclick="setTool('fill')">🟡 Fill</button>
+  <button onclick="setTool('rect')">⬛ Rectangle</button>
+  <button onclick="setTool('circle')">⚪ Circle</button>
+
+  <br>
+
+  <!-- 📏 SIZE -->
+  <label>Size:</label>
+  <input type="range" min="1" max="20" value="3" onchange="setSize(this.value)">
+
+  <br>
+
+  <!-- 🔄 ACTIONS -->
+  <button onclick="undo()">↩️ Undo</button>
+  <button onclick="redo()">↪️ Redo</button>
+  <button onclick="clearCanvas()">🧹 Clear</button>
+  <button onclick="saveImage()">💾 Save</button>
+
+</div>
+
+<br>
+<a href="../menu.html">⬅ Back</a>
+
+<script>
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+
+let drawing = false;
+let color = "black";
+let size = 3;
+let tool = "brush";
+
+let startX, startY;
+
+// 🧠 HISTORY
+let history = [];
+let redoStack = [];
+
+// save state
+function saveState(){
+  history.push(canvas.toDataURL());
+  if(history.length > 50) history.shift(); // limit memory
+  redoStack = [];
+}
+
+// TOOL SETTINGS
+function setTool(t){ tool = t; }
+function setColor(c){ color = c; }
+function setSize(s){ size = s; }
+
+// 🖱️ MOUSE DOWN
+canvas.onmousedown = (e)=>{
+  saveState();
+
+  startX = e.offsetX;
+  startY = e.offsetY;
+
+  if(tool === "fill"){
+    ctx.fillStyle = color;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    return;
+  }
+
+  drawing = true;
+};
+
+// 🖱️ MOUSE UP
+canvas.onmouseup = (e)=>{
+  if(tool === "rect"){
+    ctx.strokeStyle = color;
+    ctx.lineWidth = size;
+    ctx.strokeRect(startX, startY, e.offsetX-startX, e.offsetY-startY);
+  }
+
+  if(tool === "circle"){
+    let radius = Math.sqrt(
+      Math.pow(e.offsetX-startX,2) + Math.pow(e.offsetY-startY,2)
+    );
+    ctx.beginPath();
+    ctx.arc(startX, startY, radius, 0, Math.PI*2);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = size;
+    ctx.stroke();
+  }
+
+  drawing = false;
+  ctx.beginPath();
+};
+
+// 🖱️ DRAW / ERASE
+canvas.onmousemove = (e)=>{
+  if(!drawing) return;
+
+  ctx.lineWidth = size;
+  ctx.lineCap = "round";
+
+  ctx.strokeStyle = (tool === "eraser") ? "white" : color;
+
+  ctx.lineTo(e.offsetX, e.offsetY);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(e.offsetX, e.offsetY);
+};
+
+// 🧹 CLEAR
+function clearCanvas(){
+  saveState();
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+// 💾 SAVE
+function saveImage(){
+  let link = document.createElement('a');
+  link.download = "drawing.png";
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+// ↩️ UNDO
+function undo(){
+  if(history.length === 0) return;
+
+  redoStack.push(canvas.toDataURL());
+
+  let img = new Image();
+  img.src = history.pop();
+
+  img.onload = ()=>{
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img,0,0);
+  };
+}
+
+// ↪️ REDO
+function redo(){
+  if(redoStack.length === 0) return;
+
+  history.push(canvas.toDataURL());
+
+  let img = new Image();
+  img.src = redoStack.pop();
+
+  img.onload = ()=>{
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img,0,0);
+  };
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>🐾 Who Lives Where?</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: "Comic Sans MS", cursive;
+  background: linear-gradient(135deg, #74ebd5, #acb6e5);
+  min-height: 100vh;
+  text-align: center;
+}
+
+/* Back button */
+.back-btn {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: #2d3436;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-size: 16px;
+}
+.back-btn:hover { background: #00b894; }
+
+/* Game box */
+.game-box {
+  background: rgba(255,255,255,0.95);
+  width: 92%;
+  max-width: 1000px;
+  margin: 80px auto;
+  padding: 25px;
+  border-radius: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+h1 { margin-bottom: 5px; }
+
+.scoreboard {
+  display: flex;
+  justify-content: space-around;
+  margin: 15px 0;
+  font-size: 18px;
+}
+
+/* Cards */
+.container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.card {
+  background: #ffeaa7;
+  padding: 15px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: 0.3s;
+}
+.card:hover { transform: scale(1.05); }
+
+.card.matched {
+  background: #55efc4;
+  cursor: default;
+}
+
+.card.wrong {
+  background: #ff7675;
+}
+
+/* Dashboard */
+.dashboard {
+  margin-top: 20px;
+  background: #dfe6e9;
+  padding: 15px;
+  border-radius: 15px;
+}
+.badge { font-size: 32px; }
+</style>
+</head>
+
+<body>
+
+<a href="../menu.html" class="back-btn">⬅ Back</a>
+
+<div class="game-box">
+  <h1>🐾 Who Lives Where?</h1>
+  <p>Match the animal with its correct home 🌍</p>
+
+  <div class="scoreboard">
+    <div>Score: <span id="score">0</span></div>
+    <div>Attempts Left: <span id="attempts">3</span></div>
+  </div>
+
+  <div class="container" id="game"></div>
+
+  <div class="dashboard">
+    <h3>📊 Player Dashboard</h3>
+    <p>Best Score: <span id="best">0</span></p>
+    <p>Badge: <span class="badge" id="badge">🎖️</span></p>
+  </div>
+</div>
+
+<!-- Sounds -->
+<audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3"></audio>
+<audio id="correctSound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3"></audio>
+<audio id="wrongSound" src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3"></audio>
+
+<script>
+/* MANY animals + habitats */
+const pairs = [
+  ["🦁 Lion", "🌾 Grassland"],
+  ["🐯 Tiger", "🌳 Forest"],
+  ["🐧 Penguin", "❄️ Polar Region"],
+  ["🐪 Camel", "🏜️ Desert"],
+  ["🐬 Dolphin", "🌊 Ocean"],
+  ["🐘 Elephant", "🌿 Jungle"],
+  ["🐍 Snake", "🌴 Rainforest"],
+  ["🦒 Giraffe", "🌾 Savannah"]
+];
+
+let cards = [];
+let first = null;
+let lock = false;
+let score = 0;
+let attempts = 3;
+
+const game = document.getElementById("game");
+const scoreEl = document.getElementById("score");
+const attemptsEl = document.getElementById("attempts");
+
+function startGame() {
+  cards = [];
+  game.innerHTML = "";
+  score = 0;
+  attempts = 3;
+  first = null;
+  lock = false;
+
+  pairs.forEach(p => {
+    cards.push({ text: p[0], match: p[1] });
+    cards.push({ text: p[1], match: p[0] });
+  });
+
+  shuffle(cards).forEach(c => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerText = c.text;
+    div.dataset.match = c.match;
+    div.onclick = () => pick(div);
+    game.appendChild(div);
+  });
+
+  scoreEl.innerText = score;
+  attemptsEl.innerText = attempts;
+  loadDashboard();
+}
+
+function pick(card) {
+  if (lock || card.classList.contains("matched")) return;
+  document.getElementById("clickSound").play();
+
+  if (!first) {
+    first = card;
+    card.style.background = "#81ecec";
+  } else {
+    lock = true;
+
+    if (first.dataset.match === card.innerText) {
+      score++;
+      card.classList.add("matched");
+      first.classList.add("matched");
+      document.getElementById("correctSound").play();
+    } else {
+      attempts--;
+      attemptsEl.innerText = attempts;
+      card.classList.add("wrong");
+      first.classList.add("wrong");
+      document.getElementById("wrongSound").play();
+    }
+
+    setTimeout(() => {
+      card.classList.remove("wrong");
+      first.classList.remove("wrong");
+      card.style.background = "#ffeaa7";
+      first.style.background = "#ffeaa7";
+      first = null;
+      lock = false;
+      updateDashboard();
+      if (attempts === 0) endGame();
+    }, 900);
+  }
+
+  scoreEl.innerText = score;
+}
+
+function shuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
+}
+
+function updateDashboard() {
+  let data = JSON.parse(localStorage.getItem("gameData")) || {};
+  if (!data.habitatMatch) data.habitatMatch = { best: 0 };
+
+  data.habitatMatch.best = Math.max(data.habitatMatch.best, score);
+  localStorage.setItem("gameData", JSON.stringify(data));
+
+  document.getElementById("best").innerText = data.habitatMatch.best;
+
+  let badge = "🎖️";
+  if (score >= 3) badge = "🥉";
+  if (score >= 5) badge = "🥈";
+  if (score >= 7) badge = "🥇";
+  document.getElementById("badge").innerText = badge;
+}
+
+function loadDashboard() {
+  let data = JSON.parse(localStorage.getItem("gameData")) || {};
+  document.getElementById("best").innerText =
+    data.habitatMatch ? data.habitatMatch.best : 0;
+}
+
+function endGame() {
+  alert(`🎉 Game Over!\nYour Score: ${score}/${pairs.length}`);
+}
+
+startGame();
+</script>
+
+</body>
+</html>
